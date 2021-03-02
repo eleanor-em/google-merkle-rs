@@ -17,6 +17,7 @@ pub struct MerkleTree {
 #[derive(Debug)]
 pub struct InclusionProof {
     path: Vec<[u8; 32]>,
+    raw_path: Vec<u8>,
     leaf_index: size_t,
     tree_size: u64,
     root: [u8; 32],
@@ -102,23 +103,26 @@ impl MerkleTree {
             let ptr = merkle_tree_get_path(self.ptr,
                                            leaf_index as size_t,
                                            &mut length)
-                as *mut *const i8;
+                as *const u8;
 
             if ptr.is_null() { None } else {
                 let mut path = Vec::new();
-                let array = std::slice::from_raw_parts(ptr, length as usize);
-                for ptr in array {
-                    let buf = std::slice::from_raw_parts(*ptr as *const u8, 32);
+                let mut raw_path = Vec::new();
+
+                for i in 0..length {
+                    let buf = std::slice::from_raw_parts(ptr.offset(32 * i as isize), 32);
 
                     let mut result = [0; 32];
                     result.copy_from_slice(buf);
                     path.push(result);
+                    raw_path.extend(&result);
                 }
 
-                free_path(ptr, length);
+                free_str(ptr as *const i8);
 
                 Some(InclusionProof {
                     path,
+                    raw_path,
                     leaf_index: leaf_index as size_t,
                     tree_size: self.len() as size_t,
                     root: self.root(),
@@ -148,13 +152,8 @@ impl Verifier {
 
     pub fn verify_inclusion(&self, data: &[u8], proof: &InclusionProof) -> bool {
         unsafe {
-            let mut ptrs = Vec::new();
-            for buf in proof.path.iter() {
-                ptrs.push(buf.as_ptr() as *const i8);
-            }
-
             verifier_verify_path(self.ptr, proof.leaf_index, proof.tree_size,
-                                 ptrs.as_mut_ptr(), ptrs.len() as size_t,
+                                 proof.raw_path.as_ptr() as *const i8, proof.path.len() as size_t,
                                  proof.root.as_ptr() as *const i8,
                                  data.as_ptr() as *const i8, data.len() as size_t)
         }
@@ -257,9 +256,6 @@ mod tests {
         let index = tree.add_leaf(b"hello world");
         tree.add_leaf(b"foo");
         let proof = tree.inclusion(index).unwrap();
-        println!("{:?}", tree.get_hash(1));
-        println!("{:?}", tree.get_hash(2));
-        println!("{:?}", tree.root());
         println!("{:?}", proof);
 
         let verifier = Verifier::new();

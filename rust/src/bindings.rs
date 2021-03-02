@@ -105,7 +105,7 @@ extern "C" {
         tree: *mut merkle_tree_t,
         leaf_index: size_t,
         path_length: *mut size_t,
-    ) -> *mut *mut ::std::os::raw::c_char;
+    ) -> *mut ::std::os::raw::c_char;
 }
 extern "C" {
     pub fn merkle_tree_get_path_snapshot(
@@ -113,7 +113,7 @@ extern "C" {
         leaf_index: size_t,
         snapshot: size_t,
         path_length: *mut size_t,
-    ) -> *mut *mut ::std::os::raw::c_char;
+    ) -> *mut ::std::os::raw::c_char;
 }
 extern "C" {
     pub fn merkle_tree_consistency_proof(
@@ -121,10 +121,7 @@ extern "C" {
         snapshot1: size_t,
         snapshot2: size_t,
         path_length: *mut size_t,
-    ) -> *mut *mut ::std::os::raw::c_char;
-}
-extern "C" {
-    pub fn free_path(path: *mut *const ::std::os::raw::c_char, length: size_t);
+    ) -> *mut ::std::os::raw::c_char;
 }
 extern "C" {
     pub fn free_str(str_: *const ::std::os::raw::c_char);
@@ -146,7 +143,7 @@ extern "C" {
         verifier: *mut verifier_t,
         leaf: size_t,
         tree_size: size_t,
-        path: *mut *const ::std::os::raw::c_char,
+        path: *const ::std::os::raw::c_char,
         path_length: size_t,
         root: *const ::std::os::raw::c_char,
         data: *const ::std::os::raw::c_char,
@@ -171,7 +168,7 @@ extern "C" {
         snapshot2: size_t,
         root1: *const ::std::os::raw::c_char,
         root2: *const ::std::os::raw::c_char,
-        proof: *mut *const ::std::os::raw::c_char,
+        proof: *const ::std::os::raw::c_char,
         proof_length: size_t,
     ) -> bool;
 }
