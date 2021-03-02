@@ -1,0 +1,6 @@
+.idea/
+cmake-build-debug/
+build/
+rust/target/
+rust/include/merkletree.h
+rust/include/verifier.h
