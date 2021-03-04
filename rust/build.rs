@@ -21,6 +21,10 @@ fn main() {
 
     let bindings = bindgen::Builder::default()
         .header("include/bindings.h")
+        // blacklists to avoid unused bindings
+        .blacklist_type("wchar_t")
+        .blacklist_item("true_")
+        .blacklist_item("false_")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
         .expect("Unable to generate bindings");
